@@ -39,3 +39,8 @@ src-tauri/resources/src-macos
 # Local portable Linux build
 dist-linux/
 *.desktop
+
+# TypeScript build info / emit from composite projects
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
