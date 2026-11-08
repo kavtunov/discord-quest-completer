@@ -1,0 +1,107 @@
+<template>
+    <div class="p-4 space-y-4 container mx-auto">
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            @click="discordTest">Discord Test
+
+            connected: {{ isConnected }}
+        </button>
+
+        <!-- Logs Section -->
+        <div class="mt-4 p-4 border rounded text-gray-700 dark:text-gray-300 dark:border-gray-600">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-lg font-semibold mb-2">Logs</h2>
+                <button class="mt-2 font-bold py-1 px-3 rounded dark:bg-gray-700 bg-gray-300 hover:bg-gray-400 text-sm"
+                    @click="clearLogs">Clear Logs</button>
+            </div>
+
+            <div class="max-h-64 overflow-y-auto p-2 rounded">
+                <!-- <div v-if="logs.length === 0" class="text-gray-400">No logs available.</div>
+                <ul v-else class="list-none">
+                    <li v-for="(log, index) in logs" :key="index" class="text-sm text-gray-400">{{ log }}</li>
+                </ul> -->
+                <div v-if="logs.length === 0" class="text-gray-400">No logs available.</div>
+                <ul v-else class="list-none">
+                    <li v-for="(log, index) in logs" :key="index" class="text-sm">
+                        <span class="text-gray-500">[{{ new Date(log.timestamp).toLocaleString() }}]</span>
+                        <span :class="{
+                            'text-blue-400': log.type === 'info',
+                            'text-red-400': log.type === 'error',
+                            'text-yellow-400': log.type === 'warning',
+                            'text-green-400': log.type === 'debug'
+                        }">
+                            [{{ log.type.toUpperCase() }}]
+                        </span>
+                        <span class="ml-1">{{ log.message }}</span>
+                    </li>
+                </ul>
+            </div>
+
+
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { invoke } from '@tauri-apps/api/core';
+import { emit } from '@tauri-apps/api/event';
+import { useGlobalState } from '@/composables/app-state';
+
+const ActivityKind = {
+    Playing: 0,
+    Listening: 2,
+    Watching: 3,
+    Competing: 5
+} as const;
+
+const isConnected = ref(false);
+
+const { logs, addLog, clearLogs } = useGlobalState();
+
+function discordTest() {
+    // Safe no-op disconnect helper. Do NOT hardcode random App IDs —
+    // Discord maps them to third-party apps (the old demo showed as "Watching Pornhub").
+    if (isConnected.value) {
+        console.log('Disconnecting from Discord');
+        emit('event_disconnect');
+        isConnected.value = false;
+        addLog('info', 'Disconnected Discord RPC test activity.');
+        return;
+    }
+
+    addLog(
+        'warning',
+        'RPC test disabled: it only fakes Rich Presence and can show a random app name. Use Home → Play for quests.',
+    );
+}
+
+// function to create timestamp behind current time.
+// example: input is `4h 30m` means timestamp should start from 4 hours and 30 minutes behind current time.
+function createAgoTimestamp(input: string) {
+    const time = input.split(' ');
+    let hours = 0;
+    let minutes = 0;
+
+    for (let i = 0; i < time.length; i++) {
+        if (time[i].includes('h')) {
+            hours = parseInt(time[i]);
+        } else if (time[i].includes('m')) {
+            minutes = parseInt(time[i]);
+        }
+    }
+
+    const date = new Date();
+    date.setHours(date.getHours() - hours);
+    date.setMinutes(date.getMinutes() - minutes);
+
+    return Math.floor(date.getTime() / 1000);
+}
+
+
+onMounted(() => {
+
+})
+
+</script>
+
+<style scoped></style>

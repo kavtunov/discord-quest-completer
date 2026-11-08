@@ -1,0 +1,21 @@
+[package]
+name = "src-linux"
+version = "0.1.0"
+edition = "2021"
+description = "Minimal Linux dummy game runner for Discord Quest Completer"
+
+[[bin]]
+name = "src-linux"
+path = "src/main.rs"
+
+[dependencies]
+winit = "0.30"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false
+debug = false
